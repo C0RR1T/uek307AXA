@@ -1,0 +1,50 @@
+import * as React from 'react';
+import {
+    Formik,
+    FormikHelpers,
+    FormikProps,
+    Form,
+    Field,
+    FieldProps,
+} from 'formik';
+
+interface MyFormValues {
+    firstName: string,
+    lastName: string,
+    email: string;
+}
+
+export const FormPage = () => {
+    const initialValues: MyFormValues = { firstName: 'John', lastName: '', email: '' };
+    return (
+        <div>
+            <h1>My Example</h1>
+            <Formik
+                initialValues={initialValues}
+                onSubmit={(values, actions) => {
+                    console.log({ values, actions });
+                    alert(JSON.stringify(values, null, 2));
+                    actions.setSubmitting(false);
+                }}
+            >
+                <Form>
+                    <div className="mb-3">
+                        <label htmlFor="firstName" className="form-label">First Name</label>
+                        <Field name="firstName" type="text" className="form-control" id="firstName" aria-describedby="firstNameHelp" placeholder="First Name"/>
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="lastName" className="form-label">Last Name</label>
+                        <Field name="lastName" type="text" className="form-control" id="lastName" aria-describedby="lastNameHelp" placeholder="Last Name"/>
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="email" className="form-label">Email</label>
+                        <Field name="email" type="email" className="form-control" id="email" aria-describedby="emailHelp" placeholder="EMail"/>
+                    </div>
+                    <button type="submit" className="btn btn-primary">Submit</button>
+                </Form>
+            </Formik>
+        </div>
+    );
+};
+
+export default FormPage;
