@@ -1,50 +1,84 @@
-import * as React from 'react';
-import {
-    Formik,
-    FormikHelpers,
-    FormikProps,
-    Form,
-    Field,
-    FieldProps,
-} from 'formik';
+import React from 'react';
+import * as Yup from 'yup';
+import {withFormik, FormikProps, FormikErrors, Form, Field, ErrorMessage} from 'formik';
 
-interface MyFormValues {
+// Shape of form values
+interface FormValues {
     firstName: string,
     lastName: string,
-    email: string;
 }
 
-export const FormPage = () => {
-    const initialValues: MyFormValues = { firstName: 'John', lastName: '', email: '' };
+//Extended by MyFormProps
+interface OtherProps {
+    message: string;
+}
+
+// Aside: You may see InjectedFormikProps<OtherProps, FormValues> instead of what comes below in older code.. InjectedFormikProps was artifact of when Formik only exported a HoC. It is also less flexible as it MUST wrap all props (it passes them through).
+const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
+    const {touched, errors, isSubmitting, message} = props;
     return (
-        <div>
-            <h1>My Example</h1>
-            <Formik
-                initialValues={initialValues}
-                onSubmit={(values, actions) => {
-                    console.log({ values, actions });
-                    alert(JSON.stringify(values, null, 2));
-                    actions.setSubmitting(false);
-                }}
-            >
-                <Form>
-                    <div className="mb-3">
-                        <label htmlFor="firstName" className="form-label">First Name</label>
-                        <Field name="firstName" type="text" className="form-control" id="firstName" aria-describedby="firstNameHelp" placeholder="First Name"/>
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="lastName" className="form-label">Last Name</label>
-                        <Field name="lastName" type="text" className="form-control" id="lastName" aria-describedby="lastNameHelp" placeholder="Last Name"/>
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="email" className="form-label">Email</label>
-                        <Field name="email" type="email" className="form-control" id="email" aria-describedby="emailHelp" placeholder="EMail"/>
-                    </div>
-                    <button type="submit" className="btn btn-primary">Submit</button>
-                </Form>
-            </Formik>
+        <div className="container col-">
+            <Form>
+                <h1>{message}</h1>
+                <div className="mb-3">
+                    <label htmlFor="firstName" className="form-label">First Name</label>
+                    <Field name="firstName" type="text" className="form-control" id="firstName"
+                           aria-describedby="firstNameHelp" placeholder="First Name"/>
+                    <ErrorMessage name="lastName">
+                        { msg => <div style={{ color: 'red' }}>{msg}</div> }
+                    </ErrorMessage>
+
+                </div>
+                <div className="mb-3">
+                    <label htmlFor="lastName" className="form-label">Last Name</label>
+                    <Field name="lastName" type="text" className="form-control" id="lastName"
+                           aria-describedby="lastNameHelp" placeholder="Last Name"/>
+                    <ErrorMessage name="lastName">
+                        { msg => <div style={{ color: 'red' }}>{msg}</div> }
+                    </ErrorMessage>
+
+                </div>
+                <button type="submit" className="btn btn-primary">Submit</button>
+            </Form>
         </div>
     );
 };
 
-export default FormPage;
+// The type of props MyForm receives
+interface MyFormProps extends OtherProps {
+    initialFirstName?: string,
+    initialLastName?: string,
+}
+
+// Wrap our form with the withFormik HoC
+const MyForm = withFormik<MyFormProps, FormValues>({
+    mapPropsToValues: props => {
+        return {
+            firstName: props.initialFirstName || '',
+            lastName: props.initialLastName || ''
+        };
+    },
+
+    validationSchema: Yup.object().shape({
+            firstName: Yup.string()
+                .max(16, 'Please input 16 characters or less')
+                .required('Please input first name'),
+            lastName: Yup.string()
+                .max(16, 'Please input 16 characters or less')
+                .required('Please input last name'),
+        },
+    ),
+
+    handleSubmit: values => {
+        console.log(values)
+    },
+})(InnerForm);
+
+// Use <MyForm /> wherevs
+const Basic = () => (
+    <div>
+        <MyForm message="Sign up"/>
+    </div>
+);
+
+export default Basic;
