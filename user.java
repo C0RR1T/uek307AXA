@@ -13,10 +13,21 @@ import java.util.UUID;
 @Table(name = "users")
 public class User {
 
+    
     @Id
     @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator",
+            parameters = {
+                    @org.hibernate.annotations.Parameter(
+                            name = "uuid_gen_strategy_class",
+                            value = "org.hibernate.id.uuid.CustomVersionOneStrategy"
+                    )
+            }
+    )
     @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+    protected UUID id;
 
     @Column(name = "first_name")
     private String firstName;
